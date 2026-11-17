@@ -52,8 +52,12 @@ path. `404.html` is included.
 The backend must allow the Pages origin without a wildcard for provisioning:
 
 ```text
-CORS_ALLOWED_ORIGINS=https://pastvision.github.io
+CORS_ALLOWED_ORIGINS=https://pastvision.github.io,https://pastvision.in
 ```
+
+The project Pages URL currently redirects to the account custom domain
+`https://pastvision.in/homeserver/`, so both origins must be allowed by the
+backend provisioning API.
 
 Manifest and playback routes use a separate, Stremio-compatible CORS policy.
 The website never proxies media and cannot make GitHub Pages serve the backend.
