@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="Home Server — connect your personal media server to Stremio.">
+  <title>Home Server — Private Stremio Media Connector</title>
+  <link rel="stylesheet" href="./assets/css/style.css">
+</head>
+<body>
+  <a class="skip-link" href="#configure">Skip to configuration</a>
+  <header class="site-header">
+    <a class="brand" href="./" aria-label="Home Server home">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 32 32" role="img"><path d="M16 3 4 10v12l12 7 12-7V10L16 3Zm0 3.2 8.8 5.1v9.4L16 25.8l-8.8-5.1v-9.4L16 6.2Zm0 4.1a5.7 5.7 0 1 0 0 11.4 5.7 5.7 0 0 0 0-11.4Zm0 2.2a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7Z"/></svg>
+      </span>
+      <span>
+        <strong>Home Server</strong>
+        <small>Private Stremio Media Connector</small>
+      </span>
+    </a>
+    <nav aria-label="Page sections">
+      <a href="#overview">Overview</a>
+      <a href="#configure">Configure</a>
+      <a href="#install">Install</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" id="overview">
+      <p class="eyebrow">Personal media infrastructure</p>
+      <h1>Connect your personal media server to Stremio.</h1>
+      <p class="hero-copy">
+        Home Server is a private Stremio addon. Your playback requests go to your
+        own backend; this public page only prepares an installation link.
+      </p>
+      <div class="hero-actions">
+        <a class="button primary" href="#configure">Configure Home Server</a>
+        <a class="button ghost" href="#install">Installation steps</a>
+      </div>
+      <div class="trust-row" aria-label="Privacy highlights">
+        <span>No analytics</span>
+        <span>No account creation</span>
+        <span>No secrets stored in this site</span>
+      </div>
+    </section>
+
+    <section class="panel-grid" aria-label="How it works">
+      <article class="panel">
+        <span class="step">01</span>
+        <h2>Your backend</h2>
+        <p>Your Home Server backend validates settings against a server-side media-host allowlist and stores an opaque installation.</p>
+      </article>
+      <article class="panel">
+        <span class="step">02</span>
+        <h2>Your Stremio</h2>
+        <p>Stremio receives an opaque installation manifest URL. Playback uses short-lived, signed relay capabilities.</p>
+      </article>
+      <article class="panel">
+        <span class="step">03</span>
+        <h2>Your control</h2>
+        <p>Reconfigure or revoke an installation from this page when you have the administrative setup secret.</p>
+      </article>
+    </section>
+
+    <section class="workspace" id="configure">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Configuration</p>
+          <h2>Prepare an installation</h2>
+        </div>
+        <span class="status-pill" id="connectionPill">Backend not checked</span>
+      </div>
+
+      <form id="configForm" novalidate>
+        <div class="card">
+          <div class="card-heading">
+            <h3>Backend</h3>
+            <p>The address of the Home Server addon backend you control.</p>
+          </div>
+          <div class="field-grid">
+            <label class="field field-span">
+              <span>Backend URL</span>
+              <input id="backendUrl" name="backendUrl" type="url" inputmode="url" placeholder="https://media.example.com" autocomplete="url" required>
+              <small class="hint">HTTPS is required for a public backend. Plain HTTP is accepted only for localhost testing.</small>
+              <em class="error" data-error-for="backendUrl"></em>
+            </label>
+            <label class="field">
+              <span>Administrative setup secret</span>
+              <input id="adminSecret" name="adminSecret" type="password" autocomplete="off" spellcheck="false" required>
+              <small class="hint">Used only for this request. It is never stored by this website.</small>
+              <em class="error" data-error-for="adminSecret"></em>
+            </label>
+            <label class="field">
+              <span>Installation label <span class="optional">optional</span></span>
+              <input id="label" name="label" type="text" maxlength="80" placeholder="Living room Stremio">
+              <em class="error" data-error-for="label"></em>
+            </label>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-heading">
+            <h3>Media server</h3>
+            <p>The backend will reject a host that is not on its server-side allowlist.</p>
+          </div>
+          <div class="field-grid">
+            <label class="field field-span">
+              <span>Media server base URL</span>
+              <input id="mediaServerBaseUrl" name="mediaServerBaseUrl" type="url" inputmode="url" placeholder="https://vidsrc.mov/embed" autocomplete="url" required>
+              <small class="hint">Example default: https://vidsrc.mov/embed</small>
+              <em class="error" data-error-for="mediaServerBaseUrl"></em>
+            </label>
+            <label class="field">
+              <span>Movie endpoint template</span>
+              <input id="movieEndpoint" name="movieEndpoint" type="text" value="/movie/{imdb_id}" required>
+              <small class="hint">Must include {imdb_id}.</small>
+              <em class="error" data-error-for="movieEndpoint"></em>
+            </label>
+            <label class="field">
+              <span>TV episode endpoint template</span>
+              <input id="tvEndpoint" name="tvEndpoint" type="text" value="/tv/{imdb_id}/{season}/{episode}" required>
+              <small class="hint">Must include {imdb_id}, {season}, {episode}.</small>
+              <em class="error" data-error-for="tvEndpoint"></em>
+            </label>
+            <label class="field">
+              <span>Request timeout <span class="unit">ms</span></span>
+              <input id="timeoutMs" name="timeoutMs" type="number" min="1000" max="120000" step="1" value="15000" required>
+              <em class="error" data-error-for="timeoutMs"></em>
+            </label>
+            <label class="field">
+              <span>Relay public base URL <span class="optional">optional</span></span>
+              <input id="relayPublicBaseUrl" name="relayPublicBaseUrl" type="url" inputmode="url" placeholder="https://relay.example.com">
+              <small class="hint">Must be reachable by Stremio. Use HTTPS for a remote relay.</small>
+              <em class="error" data-error-for="relayPublicBaseUrl"></em>
+            </label>
+          </div>
+        </div>
+
+        <div class="card subtle-card">
+          <div class="card-heading">
+            <h3>Existing installation <span class="optional">optional</span></h3>
+            <p>Paste an installation ID only when updating a previous configuration.</p>
+          </div>
+          <label class="field">
+            <span>Installation ID</span>
+            <input id="installationId" name="installationId" type="text" autocomplete="off" spellcheck="false" placeholder="43-character opaque ID">
+            <small class="hint">Reconfiguration keeps the same ID and replaces the stored settings.</small>
+            <em class="error" data-error-for="installationId"></em>
+          </label>
+        </div>
+
+        <div class="form-actions">
+          <button class="button primary" type="submit" id="provisionButton">Create installation</button>
+          <button class="button ghost" type="button" id="resetButton">Reset</button>
+        </div>
+        <p class="form-message" id="formMessage" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+
+    <section class="result-card" id="result" hidden aria-live="polite">
+      <div class="result-heading">
+        <div>
+          <p class="eyebrow">Provisioned</p>
+          <h2>Your installation is ready</h2>
+        </div>
+        <span class="status-pill success">Stored server-side</span>
+      </div>
+      <dl class="result-meta">
+        <div><dt>Installation ID</dt><dd id="resultId"></dd></div>
+        <div><dt>Relay</dt><dd id="resultRelay"></dd></div>
+      </dl>
+      <div class="url-row">
+        <label class="field field-span">
+          <span>Manifest URL</span>
+          <input id="manifestUrl" class="mono" type="text" readonly>
+        </label>
+        <button class="button ghost small" type="button" id="copyManifest">Copy manifest URL</button>
+      </div>
+      <div class="install-row">
+        <a class="button primary" id="installLink" href="#">Install in Stremio</a>
+        <button class="button ghost" type="button" id="copyInstall">Copy Stremio link</button>
+      </div>
+      <p class="hint">Stremio may show a confirmation dialog. Confirm the installation for it to persist.</p>
+    </section>
+
+    <section class="install-steps" id="install">
+      <p class="eyebrow">Installation</p>
+      <h2>From browser to Stremio</h2>
+      <ol class="steps">
+        <li><span>1</span><div><strong>Configure</strong><p>Enter your backend, admin secret, and media settings.</p></div></li>
+        <li><span>2</span><div><strong>Provision</strong><p>The backend validates the settings and creates an opaque installation.</p></div></li>
+        <li><span>3</span><div><strong>Install</strong><p>Open the generated Stremio link and confirm the installation dialog.</p></div></li>
+        <li><span>4</span><div><strong>Play</strong><p>Open a movie or series in Stremio and choose Home Server.</p></div></li>
+      </ol>
+      <div class="notice">
+        <strong>Reinstall or re-configure:</strong> paste the existing installation ID, change settings, provision again, then reinstall the updated manifest link. To revoke, use the revocation control below.
+      </div>
+    </section>
+
+    <section class="workspace revoke-section" id="revoke">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Control</p>
+          <h2>Revoke an installation</h2>
+        </div>
+      </div>
+      <div class="card">
+        <div class="field-grid">
+          <label class="field">
+            <span>Installation ID</span>
+            <input id="revokeId" type="text" autocomplete="off" spellcheck="false" placeholder="43-character opaque ID">
+          </label>
+          <label class="field">
+            <span>Administrative setup secret</span>
+            <input id="revokeSecret" type="password" autocomplete="off" spellcheck="false">
+          </label>
+        </div>
+        <div class="form-actions">
+          <button class="button danger" type="button" id="revokeButton">Revoke installation</button>
+        </div>
+        <p class="form-message" id="revokeMessage" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <section class="privacy" aria-label="Privacy statement">
+      <h2>Privacy</h2>
+      <p>This site is static. It has no analytics, tracking pixels, account system, or server-side storage. Settings and the administrative secret are sent directly from your browser to the backend URL you enter. They are never uploaded to GitHub. The administrative secret is not written to localStorage, sessionStorage, cookies, or the URL.</p>
+      <p>The backend stores installation configuration on the server and exposes only an opaque installation identifier. Generated playback URLs use signed, expiring capabilities. Revoke an installation if a link is exposed.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <span>Home Server</span>
+    <span>Private Stremio Media Connector</span>
+    <a href="https://github.com/pastvision/homeserver" rel="noreferrer">Source repository</a>
+  </footer>
+
+  <script type="module" src="./assets/js/app.js"></script>
+</body>
+</html>
