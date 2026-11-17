@@ -3,6 +3,7 @@
 Static GitHub Pages frontend for the private Home Server Stremio addon.
 
 - Live target: <https://pastvision.github.io/homeserver/>
+- Deployed Pages host (account custom domain): <https://pastvision.in/homeserver/>
 - Repository: <https://github.com/pastvision/homeserver>
 - No backend, analytics, tracking, accounts or secret storage in this repository.
 
